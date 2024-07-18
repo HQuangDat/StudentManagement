@@ -15,6 +15,8 @@ namespace StudentManagement.Controllers
             this.dbContext = dbContext;
         }
 
+
+        //Add 
         [HttpGet]
         public IActionResult Add()
         {
@@ -37,6 +39,30 @@ namespace StudentManagement.Controllers
             return RedirectToAction("List", "Student");
         }
 
+        //Edit
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid Id)
+        {
+            var student = await dbContext.Students.FindAsync(Id);
+            return View(student);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Student student)
+        {
+            var student_edit = await dbContext.Students.FindAsync(student.Id);
+            if(student_edit != null)
+            {
+                student_edit.Name = student.Name;
+                student_edit.Email = student.Email;
+                student_edit.Phone = student.Phone;
+                student_edit.dateOfBirth = student.dateOfBirth;
+                student_edit.className = student.className;
+                await dbContext.SaveChangesAsync();
+            }
+            return RedirectToAction("List", "Student");
+        }
+
         //List of Students
         [HttpGet]
         public async Task<IActionResult> List() 
@@ -47,9 +73,9 @@ namespace StudentManagement.Controllers
 
         //Delete
         [HttpPost]
-        public async Task<IActionResult> Delete(Student student) 
+        public async Task<IActionResult> Delete(Guid Id) 
         {
-            var student_delete =  dbContext.Students.Find(student.Id);
+            var student_delete =  dbContext.Students.Find(Id);
             if(student_delete != null)
                 dbContext.Students.Remove(student_delete);
             await dbContext.SaveChangesAsync();
