@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
 
@@ -15,6 +16,7 @@ namespace StudentManagement
             options.UseSqlServer(builder.Configuration.GetConnectionString("StudentManagement")));
 
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
