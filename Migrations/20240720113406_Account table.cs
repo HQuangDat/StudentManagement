@@ -22,7 +22,6 @@ namespace StudentManagement.Migrations
                     firstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     lastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     gender = table.Column<bool>(type: "bit", nullable: false),
-                    avatar = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

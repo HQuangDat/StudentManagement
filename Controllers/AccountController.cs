@@ -42,7 +42,6 @@ namespace StudentManagement.Controllers
                     firstName = account.firstName,
                     lastName = account.lastName,
                     gender = account.gender,
-                    avatar = account.avatar
                 };
 
                 await dbContext.Accounts.AddAsync(register);

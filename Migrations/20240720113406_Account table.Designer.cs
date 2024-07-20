@@ -12,7 +12,7 @@ using StudentManagement.Data;
 namespace StudentManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240719090138_Account table")]
+    [Migration("20240720113406_Account table")]
     partial class Accounttable
     {
         /// <inheritdoc />
@@ -30,10 +30,6 @@ namespace StudentManagement.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("avatar")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("email")
                         .IsRequired()
