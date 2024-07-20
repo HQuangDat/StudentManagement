@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
 using StudentManagement.Models.Entity;
 
@@ -16,12 +17,32 @@ namespace StudentManagement.Controllers
             passwordHasher = new PasswordHasher<Account>();
         }
 
+        //Verify Password
+        public bool VerifyPassword(Account account, string password)
+        {
+            var result = passwordHasher.VerifyHashedPassword(account, account.password, password);
+            return result == PasswordVerificationResult.Success;
+        }
+        //Login
         [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Login(string username, string password)
+        {
+            var account_login = await dbContext.Accounts.FirstOrDefaultAsync(a => a.userName == username);
+            if(account_login != null && VerifyPassword(account_login, password))
+            {
+                return RedirectToAction("List", "Student");
+            }
+            ModelState.AddModelError(" ", "Invalid username or password");
+            return View();
+        }
+
+        //Register
         [HttpGet]
         public IActionResult Register()
         {
