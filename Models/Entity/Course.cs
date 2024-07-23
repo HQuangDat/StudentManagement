@@ -8,8 +8,6 @@
         public DateOnly dateStart { get; set; }
         public DateOnly dateEnd { get; set;}
         
-        public Guid StudentId { get; set; }
-
-        public ICollection<Student> Students { get; set; }
+        public ICollection<StudentCourse> studentCourses { get; set; }
     }
 }
