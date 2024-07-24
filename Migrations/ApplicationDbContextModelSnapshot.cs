@@ -56,6 +56,31 @@ namespace StudentManagement.Migrations
                     b.ToTable("Accounts");
                 });
 
+            modelBuilder.Entity("StudentManagement.Models.Entity.Course", b =>
+                {
+                    b.Property<Guid>("CourseID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("dateEnd")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("dateStart")
+                        .HasColumnType("date");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CourseID");
+
+                    b.ToTable("Courses");
+                });
+
             modelBuilder.Entity("StudentManagement.Models.Entity.Student", b =>
                 {
                     b.Property<Guid>("Id")
@@ -84,6 +109,50 @@ namespace StudentManagement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("StudentManagement.Models.Entity.StudentCourse", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("StudentId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("StudentCourses");
+                });
+
+            modelBuilder.Entity("StudentManagement.Models.Entity.StudentCourse", b =>
+                {
+                    b.HasOne("StudentManagement.Models.Entity.Course", "course")
+                        .WithMany("studentCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StudentManagement.Models.Entity.Student", "student")
+                        .WithMany("studentCourses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("course");
+
+                    b.Navigation("student");
+                });
+
+            modelBuilder.Entity("StudentManagement.Models.Entity.Course", b =>
+                {
+                    b.Navigation("studentCourses");
+                });
+
+            modelBuilder.Entity("StudentManagement.Models.Entity.Student", b =>
+                {
+                    b.Navigation("studentCourses");
                 });
 #pragma warning restore 612, 618
         }

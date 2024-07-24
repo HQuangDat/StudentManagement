@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
 using StudentManagement.Models.Entity;
@@ -18,25 +19,50 @@ namespace StudentManagement.Controllers
 
         //Add 
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
+            var courses = await dbContext.Courses.ToListAsync();
+            ViewBag.courses = new SelectList(courses, "CourseID", "name");
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(Student student)
+        public async Task<IActionResult> Add(Student student, List<Guid> selectedCourseIds)
         {
-            var student_add = new Student
+            if (ModelState.IsValid)
             {
-                Name = student.Name,
-                Email = student.Email,
-                Phone = student.Phone,
-                dateOfBirth = student.dateOfBirth,
-                className = student.className
-            };         
-            await dbContext.Students.AddAsync(student_add);
-            await dbContext.SaveChangesAsync();
-            return RedirectToAction("List", "Student");
+                var student_add = new Student
+                {
+                    Name = student.Name,
+                    Email = student.Email,
+                    Phone = student.Phone,
+                    dateOfBirth = student.dateOfBirth,
+                    className = student.className
+                };
+
+                await dbContext.Students.AddAsync(student_add);
+                await dbContext.SaveChangesAsync();
+
+                if (selectedCourseIds != null && selectedCourseIds.Count > 0)
+                {
+                    foreach (var courseId in selectedCourseIds)
+                    {
+                        var studentCourse = new StudentCourse
+                        {
+                            StudentId = student_add.Id,
+                            CourseId = courseId
+                        };
+                        await dbContext.StudentCourses.AddAsync(studentCourse);
+                    }
+                    await dbContext.SaveChangesAsync();
+                }
+
+                return RedirectToAction("List", "Student");
+            }
+
+            var courses = await dbContext.Courses.ToListAsync();
+            ViewBag.Courses = new SelectList(courses, "CourseID", "name");
+            return View(student);
         }
 
         //Edit

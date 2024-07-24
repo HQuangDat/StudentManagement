@@ -1,0 +1,57 @@
+﻿@model StudentManagement.Models.Entity.Course
+@{
+    ViewData["Title"] = "Add New Course";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    <title>@ViewData["Title"]</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Add New Course</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" novalidate>
+                            <div class="form-group mb-3">
+                                <label asp-for="name" class="form-label"></label>
+                                <input asp-for="name" class="form-control" />
+                                <span asp-validation-for="name" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="description" class="form-label"></label>
+                                <input asp-for="description" class="form-control" />
+                                <span asp-validation-for="description" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="dateStart" class="form-label"></label>
+                                <input asp-for="dateStart" class="form-control" type="date" />
+                                <span asp-validation-for="dateStart" class="text-danger"></span>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label asp-for="dateEnd" class="form-label"></label>
+                                <input asp-for="dateEnd" class="form-control" type="date" />
+                                <span asp-validation-for="dateEnd" class="text-danger"></span>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-block">Add Course</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

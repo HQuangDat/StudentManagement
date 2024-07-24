@@ -19,13 +19,11 @@ namespace StudentManagement.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            //Config Many to Many relationship
-            //Create key for Entity StudentCourse
-            modelBuilder.Entity<StudentCourse>()
-                .HasKey(sc => new {sc.StudentId, sc.CourseId});
+
+            modelBuilder.Entity<StudentCourse>().HasKey(sc => new {sc.StudentId, sc.CourseId});
 
             modelBuilder.Entity<StudentCourse>()
-                .HasOne(sc => sc.student)
+                .HasOne(s => s.student)
                 .WithMany(sc => sc.studentCourses)
                 .HasForeignKey(sc => sc.StudentId);
 
