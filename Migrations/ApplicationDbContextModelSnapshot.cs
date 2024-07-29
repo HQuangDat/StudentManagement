@@ -24,9 +24,11 @@ namespace StudentManagement.Migrations
 
             modelBuilder.Entity("StudentManagement.Models.Entity.Account", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("email")
                         .IsRequired()

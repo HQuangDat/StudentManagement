@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
 using StudentManagement.Models.Entity;
-using System.Reflection.Metadata.Ecma335;
 
 namespace StudentManagement.Controllers
 {
@@ -16,56 +14,66 @@ namespace StudentManagement.Controllers
             this.dbContext = dbContext;
         }
 
-
-        //Add 
+        // Add (GET)
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            var courses = await dbContext.Courses.ToListAsync();
-            ViewBag.courses = new SelectList(courses, "CourseID", "name");
+            ViewBag.Courses = await dbContext.Courses.ToListAsync();
             return View();
         }
 
+        // Add (POST)
         [HttpPost]
-        public async Task<IActionResult> Add(Student student, List<Guid> selectedCourseIds)
+        public async Task<IActionResult> Add(Student student, Guid studentCourseID)
         {
             if (ModelState.IsValid)
             {
+                if (student.studentCourses == null)
+                {
+                    student.studentCourses = new List<StudentCourse>();
+                }
+
                 var student_add = new Student
                 {
+                    Id = Guid.NewGuid(), 
                     Name = student.Name,
                     Email = student.Email,
                     Phone = student.Phone,
                     dateOfBirth = student.dateOfBirth,
-                    className = student.className
+                    className = student.className,
+                    studentCourses = new List<StudentCourse>()
                 };
 
-                await dbContext.Students.AddAsync(student_add);
+                dbContext.Students.Add(student_add);
                 await dbContext.SaveChangesAsync();
 
-                if (selectedCourseIds != null && selectedCourseIds.Count > 0)
+                var student_addcourse = new StudentCourse
                 {
-                    foreach (var courseId in selectedCourseIds)
-                    {
-                        var studentCourse = new StudentCourse
-                        {
-                            StudentId = student_add.Id,
-                            CourseId = courseId
-                        };
-                        await dbContext.StudentCourses.AddAsync(studentCourse);
-                    }
-                    await dbContext.SaveChangesAsync();
-                }
+                    StudentId = student_add.Id,
+                    CourseId = studentCourseID
+                };
 
+                student_add.studentCourses.Add(student_addcourse);
+                dbContext.StudentCourses.Add(student_addcourse);
+
+                await dbContext.SaveChangesAsync();
                 return RedirectToAction("List", "Student");
             }
 
-            var courses = await dbContext.Courses.ToListAsync();
-            ViewBag.Courses = new SelectList(courses, "CourseID", "name");
+            foreach (var modelState in ModelState)
+            {
+                foreach (var error in modelState.Value.Errors)
+                {
+                    Console.WriteLine($"Key: {modelState.Key}, Error: {error.ErrorMessage}");
+                }
+            }
+
+            ViewBag.Courses = await dbContext.Courses.ToListAsync();
             return View(student);
         }
 
-        //Edit
+
+        // Edit (GET)
         [HttpGet]
         public async Task<IActionResult> Edit(Guid Id)
         {
@@ -77,7 +85,7 @@ namespace StudentManagement.Controllers
         public async Task<IActionResult> Edit(Student student)
         {
             var student_edit = await dbContext.Students.FindAsync(student.Id);
-            if(student_edit != null)
+            if (student_edit != null)
             {
                 student_edit.Name = student.Name;
                 student_edit.Email = student.Email;
@@ -89,20 +97,23 @@ namespace StudentManagement.Controllers
             return RedirectToAction("List", "Student");
         }
 
-        //List of Students
+        // List of Students
         [HttpGet]
-        public async Task<IActionResult> List() 
+        public async Task<IActionResult> List()
         {
-            var students = await dbContext.Students.ToListAsync();
+            var students = await dbContext.Students
+                .Include(s => s.studentCourses)
+                .ThenInclude(sc => sc.course)
+                .ToListAsync();
             return View(students);
         }
 
-        //Delete
+        // Delete
         [HttpPost]
-        public async Task<IActionResult> Delete(Guid Id) 
+        public async Task<IActionResult> Delete(Guid Id)
         {
-            var student_delete =  dbContext.Students.Find(Id);
-            if(student_delete != null)
+            var student_delete = dbContext.Students.Find(Id);
+            if (student_delete != null)
                 dbContext.Students.Remove(student_delete);
             await dbContext.SaveChangesAsync();
             return RedirectToAction("List", "Student");
