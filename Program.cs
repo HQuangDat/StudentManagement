@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
@@ -14,6 +15,11 @@ namespace StudentManagement
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("StudentManagement")));
+            //Add Authenticate
+            builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+            options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+            
 
             var app = builder.Build();
 
