@@ -1,29 +1,25 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
 using StudentManagement.Models.Entity;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace StudentManagement.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly PasswordHasher<Account> passwordHasher;
+        private readonly ApplicationDbContext _dbContext;
+        private readonly IPasswordHasher<Account> _passwordHasher;
 
-        public AccountController(ApplicationDbContext dbContext)
+        public AccountController(ApplicationDbContext dbContext, IPasswordHasher<Account> passwordHasher)
         {
-            this.dbContext = dbContext;
-            passwordHasher = new PasswordHasher<Account>();
+            _dbContext = dbContext;
+            _passwordHasher = passwordHasher;
         }
 
-        //Verify Password
-        public bool VerifyPassword(Account account, string password)
-        {
-            var result = passwordHasher.VerifyHashedPassword(account, account.password, password);
-            return result == PasswordVerificationResult.Success;
-        }
-        //Login
         [HttpGet]
         public IActionResult Login()
         {
@@ -33,16 +29,34 @@ namespace StudentManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
-            var account_login = await dbContext.Accounts.FirstOrDefaultAsync(a => a.userName == username);
-            if(account_login != null && VerifyPassword(account_login, password))
+            var account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.userName == username);
+            if (account != null && VerifyPassword(account, password))
             {
-                return RedirectToAction("List", "Student");
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, account.userName),
+                    new Claim(ClaimTypes.NameIdentifier, account.Id.ToString())
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                return RedirectToAction("Index", "Home");
             }
-            ModelState.AddModelError(" ", "Invalid username or password");
+
+            ModelState.AddModelError("", "Invalid username or password");
             return View();
         }
 
-        //Register
         [HttpGet]
         public IActionResult Register()
         {
@@ -54,25 +68,24 @@ namespace StudentManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                account.password = passwordHasher.HashPassword(account, account.password);
-                var register = new Account
-                {
-                    userName = account.userName,
-                    password = account.password,
-                    email = account.email,
-                    firstName = account.firstName,
-                    lastName = account.lastName,
-                    gender = account.gender,
-                };
-
-                await dbContext.Accounts.AddAsync(register);
-                await dbContext.SaveChangesAsync();
-
-                return RedirectToAction("Login", "Account");
+                account.password = _passwordHasher.HashPassword(account, account.password);
+                await _dbContext.Accounts.AddAsync(account);
+                await _dbContext.SaveChangesAsync();
+                return RedirectToAction("Login");
             }
-
             return View(account);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
+
+        private bool VerifyPassword(Account account, string password)
+        {
+            return _passwordHasher.VerifyHashedPassword(account, account.password, password) != PasswordVerificationResult.Failed;
+        }
     }
 }

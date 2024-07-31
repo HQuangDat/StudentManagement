@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Data;
+using StudentManagement.Models.Entity;
 
 namespace StudentManagement
 {
@@ -15,11 +16,17 @@ namespace StudentManagement
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("StudentManagement")));
+
+            builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
+
             //Add Authenticate
-            builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-            options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-            
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                });
+
 
             var app = builder.Build();
 
@@ -37,6 +44,7 @@ namespace StudentManagement
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
