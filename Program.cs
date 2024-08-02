@@ -25,8 +25,14 @@ namespace StudentManagement
                 {
                     options.LoginPath = "/Account/Login";
                     options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
                 });
-
+            
+            builder.Services.AddAuthorization( options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("User"));
+            });
 
             var app = builder.Build();
 

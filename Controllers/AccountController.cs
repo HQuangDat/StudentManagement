@@ -20,6 +20,7 @@ namespace StudentManagement.Controllers
             _passwordHasher = passwordHasher;
         }
 
+        //Ham xu ly dang nhap
         [HttpGet]
         public IActionResult Login()
         {
@@ -35,7 +36,8 @@ namespace StudentManagement.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, account.userName),
-                    new Claim(ClaimTypes.NameIdentifier, account.Id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()),
+                    new Claim(ClaimTypes.Role, account.Role)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -56,7 +58,7 @@ namespace StudentManagement.Controllers
             ModelState.AddModelError("", "Invalid username or password");
             return View();
         }
-
+        //Ham xu ly dang ky
         [HttpGet]
         public IActionResult Register()
         {
@@ -69,6 +71,7 @@ namespace StudentManagement.Controllers
             if (ModelState.IsValid)
             {
                 account.password = _passwordHasher.HashPassword(account, account.password);
+                account.Role = "User";
                 await _dbContext.Accounts.AddAsync(account);
                 await _dbContext.SaveChangesAsync();
                 return RedirectToAction("Login");
@@ -76,6 +79,7 @@ namespace StudentManagement.Controllers
             return View(account);
         }
 
+        //Ham xu ly dang xuat
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -86,6 +90,13 @@ namespace StudentManagement.Controllers
         private bool VerifyPassword(Account account, string password)
         {
             return _passwordHasher.VerifyHashedPassword(account, account.password, password) != PasswordVerificationResult.Failed;
+        }
+
+        //Ham xu ly Access Denied
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

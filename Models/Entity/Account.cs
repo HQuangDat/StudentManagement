@@ -26,5 +26,7 @@ namespace StudentManagement.Models.Entity
 
         [Display(Name = "Gender")]
         public bool gender { get; set; }
+
+        public string Role  { get; set; }
     }
 }
