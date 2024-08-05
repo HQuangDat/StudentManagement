@@ -32,13 +32,6 @@ namespace StudentManagement.Data
                 .HasOne(c => c.course)
                 .WithMany(sc => sc.studentCourses)
                 .HasForeignKey(c => c.CourseId);
-
-            //Account - Staff
-            // Configure one-to-one relationship between Account and Staff
-            modelBuilder.Entity<Account>()
-                .HasOne(a => a.Staff)
-                .WithOne(s => s.Account)
-                .HasForeignKey<Staff>(s => s.AccountId);
         }
     }
 }
