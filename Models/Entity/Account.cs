@@ -28,5 +28,10 @@ namespace StudentManagement.Models.Entity
         public bool gender { get; set; }
 
         public string Role  { get; set; }
+
+        public Staff Staff { get; set; }
+
+        // Foreign key for Staff
+        public Guid? StaffId { get; set; }
     }
 }
